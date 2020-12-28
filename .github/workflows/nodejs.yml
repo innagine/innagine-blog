@@ -28,8 +28,8 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: byu7172490001.my3w.com
-          username: innagine
-          password: ningdong1hao
+          username: ${{ secrets.ftp_user }}
+          password: ${{ secrets.ftp_pwd }}
           local-dir: ./build/
           server-dir: ./htdocs/
         env:
