@@ -140,15 +140,15 @@ module.exports = {
             // },
           ],
         },
-        {
-          title: "友情链接",
-          items: [
-            {
-              label: "yuqing521のblog",
-              to: "https://yuqing521.github.io/",
-            },
-          ],
-        },
+        // {
+        //   title: "友情链接",
+        //   items: [
+        //     {
+        //       label: "yuqing521のblog",
+        //       to: "https://yuqing521.github.io/",
+        //     },
+        //   ],
+        // },
       ],
       copyright: `Copyright © ${new Date().getFullYear()} innagine Built with Docusaurus.<p>粤ICP备XXXXXXX号-3</p>`,
     },
