@@ -123,21 +123,21 @@ module.exports = {
             },
             {
               label: "GitHub",
-              href: "https://github.com/zxuqian/zxuqian.cn",
+              href: "https://github.com/innagine",
             },
             {
-              label: "Bilibili 哔哩哔哩",
-              href: "https://space.bilibili.com/302954484",
+              label: "CSDN",
+              href: "https://blog.csdn.net/imagine_tion",
             },
-            {
-              label: "网易云课堂",
-              href:
-                "https://study.163.com/course/courseMain.htm?courseId=1210022809&share=2&shareId=480000002172128",
-            },
-            {
-              label: "腾讯课堂",
-              href: "https://ke.qq.com/course/2839093?tuin=3850fdc6",
-            },
+            // {
+            //   label: "网易云课堂",
+            //   href:
+            //     "https://study.163.com/course/courseMain.htm?courseId=1210022809&share=2&shareId=480000002172128",
+            // },
+            // {
+            //   label: "腾讯课堂",
+            //   href: "https://ke.qq.com/course/2839093?tuin=3850fdc6",
+            // },
           ],
         },
         {
@@ -150,7 +150,7 @@ module.exports = {
           ],
         },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} 峰华 (张旭乾) Built with Docusaurus.<p>冀ICP备14007097号-3</p>`,
+      copyright: `Copyright © ${new Date().getFullYear()} innagine Built with Docusaurus.<p>粤ICP备XXXXXXX号-3</p>`,
     },
     prism: {
       darkTheme: require("prism-react-renderer/themes/vsDark"),
@@ -180,8 +180,8 @@ module.exports = {
           blogSidebarTitle: "近期文章",
           feedOptions: {
             type: "all",
-            title: "峰华前端工程师",
-            copyright: `Copyright © ${new Date().getFullYear()} 峰华 (张旭乾) Built with Docusaurus.<p>冀ICP备14007097号-3</p>`,
+            title: "innagine",
+            copyright: `Copyright © ${new Date().getFullYear()} INNAGINE</p>`,
           },
         },
         theme: {
