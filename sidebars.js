@@ -11,7 +11,8 @@ module.exports = {
   //   "React 基础示例": [],
   // },
   css_tutorials: {
-    基础: ["css/box-model"],
+    基础: ["css/box-model/box-model",
+           "css/box-model/box-bfc"],
   },
   videos: {
     简介: ["videos/videos-intro"],
