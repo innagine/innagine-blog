@@ -59,8 +59,9 @@ module.exports = {
           items: [
             {
               label: "CSS",
-              to: "docs/css/box-model/box-model",
+              to: "docs/css/box-model",
             },
+            
           ],
         },
         {
