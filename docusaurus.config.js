@@ -43,16 +43,16 @@ module.exports = {
         //   position: "right",
         //   to: "docs/videos/videos-intro",
         // },
-        {
-          label: "课程",
-          position: "right",
-          items: [
-            {
-              label: "React 即时通信 UI 开发实战",
-              to: "docs/course/react-chat-ui/react-chat-ui",
-            },
-          ],
-        },
+        // {
+        //   label: "课程",
+        //   position: "right",
+        //   items: [
+        //     {
+        //       label: "React 即时通信 UI 开发实战",
+        //       to: "docs/course/react-chat-ui/react-chat-ui",
+        //     },
+        //   ],
+        // },
         {
           label: "教程",
           position: "right",
