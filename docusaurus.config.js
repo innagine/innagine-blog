@@ -61,6 +61,10 @@ module.exports = {
               label: "CSS",
               to: "docs/css/box-model/box-model",
             },
+            {
+              label: "JS",
+              to: "docs/JS/js-dom",
+            },
             
           ],
         },
