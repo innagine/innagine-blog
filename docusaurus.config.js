@@ -54,7 +54,7 @@ module.exports = {
         //   ],
         // },
         {
-          label: "教程",
+          label: "前端基础",
           position: "right",
           items: [
             {
