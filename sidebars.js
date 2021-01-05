@@ -17,6 +17,11 @@ module.exports = {
           "css/box-model/box-flex",
           ],
   },
+  js_tutorials: {
+    基础: [
+          "JS/js-dom",
+          ],
+  },
   videos: {
     简介: ["videos/videos-intro"],
     JavaScript: ["videos/js/01-event-loop/event-loop"],
