@@ -20,6 +20,9 @@ module.exports = {
   js_tutorials: {
     基础: [
           "JS/js-dom",
+          "JS/js-set1",
+          "JS/js-set2",
+          "JS/js-set3",
           ],
   },
   videos: {
