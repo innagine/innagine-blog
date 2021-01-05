@@ -23,6 +23,10 @@ module.exports = {
           "JS/js-set1",
           "JS/js-set2",
           "JS/js-set3",
+          "JS/js-map1",
+          "JS/js-map2",
+          "JS/js-map3",
+          "JS/js-map4",
           ],
   },
   videos: {
