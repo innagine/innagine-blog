@@ -20,7 +20,6 @@ module.exports = {
   js_tutorials: {
     基础: [
           "JS/js-dom",
-          "JS/js-rubbish",
           "JS/js-set1",
           "JS/js-set2",
           "JS/js-set3",
@@ -28,6 +27,7 @@ module.exports = {
           "JS/js-map2",
           "JS/js-map3",
           "JS/js-map4",
+          "JS/js-rubbish",
           ],
   },
   videos: {
