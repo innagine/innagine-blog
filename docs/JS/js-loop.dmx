@@ -1,0 +1,84 @@
+---
+id: js-loop
+title: 对象的循环遍历
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: javascript中的对象的循环遍历
+keywords:
+  - js
+  - frontend
+---
+
+# 对象的循环遍历
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2021011217311750.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+### 一、方法种类
+
+- for  in
+- Object.keys()
+- Object.getOwnPropertyNames()
+- Object.OwnPropertySymbols()
+- Reflect.ownKeys()
+
+
+
+### 二、方法规则
+
+1. for...in：循环遍历对象自身的和继承的可枚举的属性（不含 Symbol 属性）。
+
+   ```javascript
+   for (const key in obj) {
+           console.log(key + ' --- ' + obj[key]);
+       }
+   ```
+
+   
+
+2. Object.keys(obj)：返回一个数组，包括对象自身的所有可枚举属性（不含继承的和Symbol 属性）。
+
+   ```javascript
+   for (const key of Object.keys(obj)) {
+           console.log(key + ' --- ' + obj[key]);
+       }
+   ```
+
+   
+
+3. Object.getOwnPropertyNames(obj)：返回一个数组，包含对象自身的所有属性（不含 Symbol 属性，但包含不可枚举属性）。
+
+   ```javascript
+   for (const key of Object.getOwnPropertyNames(obj)) {
+           console.log(key + ' --- ' + obj[key]);
+       }
+   ```
+
+   
+
+4. Object.getOwnPropertySymbols(obj)：返回一个数组，包含对象自身的所有 Symbol 属性。
+
+   ```
+   for (const key of Object.getOwnPropertySymbols(obj)) {
+           console.log(key + ' --- ' + obj[key]);
+       }
+   ```
+
+   
+
+5. Reflect.ownKeys(obj)：返回一个数组，包含对象自身的所有属性（不含继承的）。
+
+   ```javascript
+   for (const key of Reflect.ownKeys(obj)) {
+           console.log(key + ' --- ' + obj[key]);
+       }
+   ```
+
+   
+
+### 三、遍历规则
+
+这几种方法遍历对象的键名，都遵守以下次序规则：
+
+1. 首先遍历所有数值键，按照数值升序排列。 
+2. 其次遍历所有字符串键，按照加入时间升序排列。 
+3. 最后遍历所有 Symbol 键，按照加入时间升序排列。
