@@ -1,0 +1,97 @@
+---
+id: js-proto
+title: proto 和 prototype 区别
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: JavaScript基础：proto 和 prototype 区别
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210118194650946.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+### 一、介绍
+
+1. #### proto(__ proto__)
+
+   在类似 `java` 这种语言中，继承的概念是通过类和类之间实现的，但 `javascript` 根本没有类，都是对象，所以，在 `javascript`中，继承的概念是通过对象和对象之间实现的。
+
+   在考虑 `javascript` 继承的时候，范围只限于引用数据类型，虽然引用数据类型分为 `Function` 和 `Object` 两种，但在继承问题上，不需要区分 `Function` 和 `Object`，只需要统一看成对象即可。
+
+   `__proto__`和`prototype` 不同，prototype 只在 Function 中有，而`__proto__`则在`Function`和`Object`中都有。javascript 是通过`__proto__`来确定继承关系的 。
+
+   `javascript`继承的本质： 一个对象 A的`__proto__`属性指向的那个对象B，B就是 A 的原型对象（或者叫父对象），对象 A 可以使用对象 B 中的属性和方法，同时也可以使用对象 B 的 原型对象C 上的属性和方法，以此递归，就是所谓的原型链。
+
+   ```javascript
+   var A = {name:'前端收割机'}
+   var B = {age:18}
+   var c = {hobby:'摄影'}
+   
+   A.__proto__ = B;//将B设置为A的父对象
+   B.__proto__ = C;//将C设置为B的父对象
+   
+   console.log(A.name) //前端收割机
+   console.log(A.age)  //18
+   console.log(A.hobby)//摄影
+   ```
+
+2. #### prototype
+
+   一个`__proto__`就实现了继承问题。那还要 `prototype` 做什么呢？
+
+   `prototype`在继承中又起什么作用呢，其实 `prototype` 真正起作用的是在把 `Function` 当做构造函数使用的时候，因为`__proto__`并不是官方标准定义的属性，所以借助 `prototype`属性来模仿类和类之间的继承模式。
+
+   当通过`new`关键字调用函数时，执行的是构造函数，它负责创建一个实例对象，把实例对象的`__proto__`属性指向构造函数的`prototype`来实现继承构造函数`prototype`的所有属性和方法，将`this`绑定到实例上，然后再执行函数体。
+
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210118195431531.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+   从上图我们可以找出`foo`对象和`Foo`函数的原型链：
+
+   1.`foo`对象原型链
+
+   ```javascript
+   foo.__proto__ == Foo.prototype;
+   foo.__proto__.__proto__ == Foo.prototype.__proto__ == Object.prototype;
+   foo.__proto__.__proto__.__proto__ == Foo.prototype.__proto__.__proto__ == Object.prototype.__proto__ == null;
+   ```
+
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210118195455470.png#pic_center)
+
+
+   
+
+   2.`Foo`构造函数原型链
+
+   ```javascript
+   Foo.__proto__ == Function.prototype;
+   Foo.__proto__.__proto__ == Function.prototype.__proto__;
+   Foo.__proto__.__proto__.__proto__ == Function.prototype.__proto__.__proto__ == Object.prototype.__proto__ == null;
+   ```
+
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210118195512598.png#pic_center)
+
+
+   
+
+   构造函数`Foo`的原型链上没有`Foo.prototype`，因此无法继承`Foo.prototype`上的属性和方法。而实例`foo`的原型链上有`Foo.prototype`，因此`foo`可以继承`Foo.prototype`上的属性和方法。
+
+### 二、作用
+
+1. #### proto(__ proto__):
+
+   - 实现对象之间的继承，形成原型链。
+   - 使子辈对象可以使用父辈的属性和方法。
+
+2. #### prototype:
+
+   - 让该构造函数所实例化的对象们都可以找到公用的属性和方法( 即 `foo.__proto__ === Foo.prototype` )。
+   - 使`Javascript`借助 `prototype`属性来模仿实现类和类之间的继承模式。
+
+### 三、总结
+
+1. __proto__`（和`constructor`属性）是**对象**所独有的；prototype`属性是**函数**所独有的，因为函数也是一种对象，所以函数也拥有`__proto__`和`constructor`属性。
+2. `__proto__`属性的**作用**就是当访问一个对象的属性时，如果该对象内部不存在这个属性，那么就会去它的`__proto__`属性所指向的那个对象（父对象）里找，一直找，直到`__proto__`属性的终点`null`。使子辈对象可以使用父辈的属性和方法。
+3. `prototype`属性的**作用**就是让该函数所实例化的对象们都可以找到公用的属性和方法，使`Javascript`借助 `prototype`属性来模仿实现类和类之间的继承模式。

@@ -23,6 +23,7 @@ module.exports = {
           "JS/js-rubbish",
           "JS/js-loop",
           "JS/js-ajax",
+          "JS/js-proto",
           "JS/js-set1",
           "JS/js-set2",
           "JS/js-set3",
