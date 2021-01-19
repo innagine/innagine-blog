@@ -24,6 +24,7 @@ module.exports = {
           "JS/js-loop",
           "JS/js-ajax",
           "JS/js-proto",
+          "JS/js-symbol",
           "JS/js-set1",
           "JS/js-set2",
           "JS/js-set3",

@@ -1,0 +1,169 @@
+---
+id: js-symbol
+title: Symbol的用法
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: JavaScript基础：Symbol的作用
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210119111139994.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+## Symbol 是什么?
+
+`Symbol` 是 `ES6` 新推出的一种基本类型，它表示独一无二的值，它可以接受一个字符串作为参数，带有相同参数的两个`Symbol `值不相等，这个参数只是表示`Symbol`值的描述而已，主要用于程序调试时的跟踪，当然你也可以不传入参数，同样的我们可以通过typeof来判断是否为Symbol类型。
+
+```js
+const s1 = Symbol();
+const s2 = Symbol();
+console.log(s1 === s2); // false
+
+const s1 = Symbol('debug');
+const str = 'debug';
+const s2 = Symbol('debug');
+console.log(s1 === str); // false
+console.log(s1 === s2); // false
+console.log(s1); // Symbol(debug)
+console.log(typeof s1); // symbol
+```
+
+`Symbol()`不是一个完整的构造函数，因此不能通过`new Symbol()` 来创建(通过 `new `实例化的结果是一个 `object `对象，而不是原始类型的 `symbol`)
+
+```js
+const s1 = new Symbol();
+// Uncaught TypeError: Symbol is not a constructor
+```
+
+`Symbol `不能进行隐式类型转换，但可以显式转为字符串；不能转化为数字，但可以转化为布尔值
+
+```js
+const s = Symbol('s')
+
+// 强制类型转换会抛类型错误
+
+console.log(s + '/s'); // TypeError: Cannot convert a Symbol value to a string
+console.log(`${s}/s`) // TypeError: Cannot convert a Symbol value to a string
+
+// 只能先进行强制转换
+console.log(String(s) + '/s'); // Symbol(s)/s
+console.log(s.toString() + '/s'); // Symbol(s)/s
+```
+
+
+
+## Symbols 作为对象的属性
+
+由于Symbol值的唯一性，意味着它可以作为对象的属性名，避免出现相同属性名，产生某一个属性被改写或覆盖的情况。
+
+```js
+let sym3 = Symbol('test');
+let obj={name: 'lin', [sym3]: 'foo'};
+obj[sym3];       //"foo"
+JSON.stringify(obj);  //"{"name":"lin"}"
+Object.keys(obj);   //["name"]
+Object.getOwnPropertyNames(obj);   //["name"]
+for (let key in obj) {
+    console.log(key);     //name
+}
+Object.getOwnPropertySymbols(obj);  //[Symbol(test)]
+```
+
+Symbol值作为属性名时，需要注意两点：
+
+1、不能通过点运算符访问，需要通过方括号的形式访问。
+
+2、不能通过`for...in`、`for...of`遍历，也不会被  `Object.keys()`、`Object.getOwnPropertyNames()`、`JSON.stringify()`返回。但是它也不是私有属性，可以通过`Object.getOwnPropertySymbols()`和 `Reflect.ownKeys()`方法获取对象Symbol 属性名。
+
+
+
+## Symbol的方法
+
+`Symbol`有两个方法，分别是`Symbol.for()`和`Symbol.keyFor()`
+
+#### 1、Symbol.for()
+
+`Symbol.for()`是用于将描述相同的`Symbol`变量指向同一个`Symbol`值
+
+```js
+let a1 = Symbol.for('a');
+let a2 = Symbol.for('a');
+a1 === a2  // true
+typeof a1  // "symbol"
+typeof a2  // "symbol"
+
+let a3= Symbol("a");
+a1 === a3      // false
+```
+
+它跟`symbol()`的区别是`Symbol()`定义的值每次都是新建，即使描述相同值也不相等，而`Symbol.for()`定义的值会先检查给定的描述是否已经存在，如果不存在才会新建一个值，并把这个值登记在全局环境中供搜索，`Symbol.for()`定义相同描述的值时会被搜索到，描述相同则他们就是同一个值
+
+#### 2、Symbol.keyFor()
+
+​	`Symbol.keyFor()`是用来检测该字符串参数作为名称的 `Symbol `值是否已被登记，返回一个已登记的 `Symbol` 类型值的` key`
+
+```js
+let a1 = Symbol.for("a");
+Symbol.keyFor(a1);    // "a"
+
+let a2 = Symbol("a");
+Symbol.keyFor(a2);    // undefined
+```
+
+
+
+## Symbol的属性
+
+#### Symbol.prototype.description
+
+`Symbol `的原型上有一个`description`属性，用来返回`Symbol`数据的描述
+
+```js
+// Symbol()定义的数据
+let a = Symbol("acc");
+a.description  // "acc"
+Symbol.keyFor(a);  // undefined
+
+// Symbol.for()定义的数据
+let a1 = Symbol.for("acc");
+a1.description  // "acc"
+Symbol.keyFor(a1);  // "acc"
+
+// 未指定描述的数据
+let a2 = Symbol();
+a2.description  // undefined
+```
+
+`description`属性和`Symbol.keyFor()`方法的区别是： `description`能返回所有`Symbol`类型数据的描述，而`Symbol.keyFor()`只能返回`Symbol.for()`在全局注册过的描述
+
+
+
+## Symbol的使用场景
+
+1、作为对象属性 当一个复杂对象中含有多个属性的时候，很容易将某个属性名覆盖掉，利用 Symbol 值作为属性名可以很好的避免这一现象
+
+```js
+const name = Symbol('name');
+const obj = {
+    [name]: 'ClickPaas',
+}
+```
+
+2、ES6 中的类是没有 private 关键字来声明类的私有方法和私有变量的，但是我们可以利用 Symbol 的唯一性来模拟
+
+```js
+const speak = Symbol();
+class Person {
+    [speak]() {
+        console.log(123)
+    }
+}
+let person = new Person()
+console.log(person[speak]())
+```
+
+因为使用者无法在外部创建出一个相同的 speak，所以就无法调用该方法
+
