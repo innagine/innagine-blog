@@ -1,0 +1,177 @@
+---
+id: js-variate
+title: 栈堆、变量存储
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 1.变量的储存方式：栈（Stack）、堆（heap）；2.变量的类型：全局变量、被捕获变量、局部变量。
+keywords:
+  - js
+  - frontend
+---
+
+
+### 一、栈堆概念
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210125155416408.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+1. 栈
+
+   栈是内存中一块用于存储局部变量和函数参数的线性结构，遵循着**先进后出**的原则。数据只能顺序的入栈，顺序的出栈。当然，栈只是内存中一片连续区域一种形式化的描述，数据入栈和出栈的操作仅仅是栈指针在内存地址上的上下移动而已。如下图所示（以 C 语言为例）：
+
+   ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210125155926414.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+   如图所示，栈指针刚开始指向内存中 `0x001` 的位置，接着 `sum` 函数开始调用，由于声明了两个变量，往栈中存放了两个数值，栈指针也对应开始移动，当 `sum` 函数调用结束时，仅仅是把栈指针往下移动而已，并不是真正的数据弹出，数据还在，只不过下次赋值时会被覆盖。
+
+   内存中栈区的数据，在函数调用结束后，就会自动的出栈（被覆盖），不需要程序进行操作，操作系统会自动执行，换句话说：栈中的变量在函数调用结束后，就会消失。
+
+   因此栈的特点：轻量，不需要手动管理，函数调时创建，调用结束则消失。
+
+2. 堆
+
+   堆可以简单的认为是一大块内存空间，就像一个人行李箱，你往里面放什么都没关系，但是行李箱是私人物品，操作系统并不会管你的行李箱里都放了什么，也不会主动去清理你的行李箱，因此在 `C` 语言中，堆中内容是需要程序员手动清理的，不然就会出现内存溢出的情况。
+
+   为了解决堆内存处理的问题，`Javascript`提出了垃圾回收机制的解决方案（具体内容请查找前期推文）。
+
+   因此堆的特点：空间大，但需要手动清理，不会被清除或者自动消失。
+
+   （注意 : 内存中所说的堆并非数据解构上所说的堆）
+
+堆栈缓存方式：栈使用的是一级缓存， 他们通常都是被调用时处于存储空间中，调用完毕立即释放。 堆则是存放在二级缓存中，生命周期由虚拟机的垃圾回收算法来决定。所以调用这些对象的速度要相对来得低一些。
+
+### 二、变量存储
+
+如果直接照搬这个结论（结论：对于原始类型，数据本身是存在栈内，对于对象类型，在栈中存的只是一个堆内地址的引用）。显然是不成立的。
+
+对于形成闭包的情形，闭包中的数据（包括基本类型和引用类型）则会添加到堆中。下面为示例代码。
+
+```javascript
+function test () {
+    let num = 1;
+    let string = '前端';
+    let bool = true;
+    let obj = {
+        attr1: 1,
+        attr2: '收割机',
+        attr3: true,
+        attr4: 'something'
+    }
+    return function log() {
+        console.log(num, string, bool, obj);
+    }
+}
+```
+
+随着 `test` 的调用，为了保证数据变量不被销毁，在堆中先生成一个对象就叫 `Scope` ，把变量作为 `Scope` 的属性给存起来。堆中的数据结构大致如下所示：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210125160055532.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+由于 `Scope` 对象是存储在堆中，因此返回的 `log` 函数完全可以拥有 `Scope` 对象 的访问。
+
+下图是该段代码在 `Chrome` 中的执行效果：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210125160137291.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+红框部分，与上述一致，例子中 `JavaScript` 的变量并没有存在栈中，而是在堆里，用一个特殊的对象（`Scope`）保存。
+
+因此我们由此可知：闭包中的数据是储存在栈中的。
+
+
+
+在 `JavaScript` 中，变量分为三种类型：
+
+- 局部变量
+- 被捕获变量
+- 全局变量
+
+
+
+**局部变量**：在函数中声明，且在函数返回后不会被其他作用域所使用的对象。下面代码中的 `part*` 都是局部变量。
+
+```javascript
+function test () {
+    let part1 = 1;
+    var part2 = '前端收割机';
+    let part3 = {a: 'goodJob'};
+    const part4 = true;
+    return;
+}
+```
+
+
+
+**被捕获变量**：在函数中声明，但在函数返回后仍有未执行作用域（函数或是类）使用到该变量，那么该变量就是被捕获变量(形成闭包中的变量)。下面代码中的 `catch*` 都是被捕获变量。
+
+```javascript
+function test1 () {
+    let catch1 = 1;
+    let catch2 = '前端收割机';
+    let catch3 = true;
+    let catch4 = {a: 'goodJob'};
+    return function () {
+        console.log(catch1, catch2, catch3, catch4)
+    }
+}
+
+function test2 () {
+    let catch1 = 1;
+    let catch2 = '前端收割机';
+    let catch3 = true;
+    let catch4 = {a: 'goodJob'};
+    return class {
+        constructor(){
+            console.log(catch1, catch2, catch3, catch4)
+        }
+    }
+}
+
+console.dir(test1())
+console.dir(test2())
+```
+
+复制代码到 `Chrome` 即可查看输出对象下的 `[[Scopes]]` 下有对应的 `Scope`。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210125160220717.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+
+
+**全局变量**：全局变量就是 `global`，在 浏览器上为 `window` 在 `node` 里为 `global`。全局变量会被默认添加到函数作用域链的最低端，也就是上述函数中 `[[Scopes]]` 中的最后一个。
+
+[外链图片转存失败,源站可能有防盗链机制,建议将图片保存下来直接上传(img-4TnJE40Z-1611561040357)(D:\CSND\global.png)]
+
+全局变量需要特别注意一点：`var` 和 `let/const` 的区别。
+
+全局的 `var` 变量其实仅仅是为 `global` 对象添加了一条属性。
+
+```
+var testVar = 1;
+
+// 相当于以下操作
+windows.testVar = 1;
+```
+
+全局的 `let/const` 变量不会修改 `windows` 对象，而是将变量的声明放在了一个特殊的对象下（与 `Scope` 类似）。
+
+```
+let testLet = 1;
+
+console.dir(() => {})
+```
+
+复制到 `Chrome` 有以下结果：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210125160244350.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+### 三、结论
+
+1.变量的储存方式：栈（Stack）、堆（heap）。
+
+2.变量的类型：全局变量、被捕获变量、局部变量。
+
+3.对于变量的储存：
+
+- 全局变量和被捕获变量储存在堆中（全局中的基本类型的值是存在堆中，它的引用地址是存在全局执行上下文的栈内存中）。
+- 局部变量：如果是基础类型，那栈中储存的是数据本身。如果是对象类型，那栈中存储的是堆中对象的引用（对象本身储存在堆中）。
