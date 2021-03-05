@@ -74,7 +74,7 @@ module.exports = {
           to: "docs/resources/resources-intro",
         },
         {
-          href: "https://www.houdunren.com/Edu/system",
+          href: "https://www.houdunren.com/Edu/site/1/front/system/index",
           label: "后端学习",
           position: "right",
         },
