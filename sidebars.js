@@ -1,3 +1,10 @@
+/*
+ * @Description: file contentIMAGINE
+ * @Author: IMAGINE
+ * @Date: 2021-01-05 10:41:39
+ * @LastEditors: IMAGINE
+ * @LastEditTime: 2021-03-22 23:13:14
+ */
 /**
  * Copyright (c) 2017-present, Facebook, Inc.
  *
@@ -34,6 +41,11 @@ module.exports = {
           "JS/js-map2",
           "JS/js-map3",
           "JS/js-map4",
+          "JS/js-visible",
+          "JS/js-typechange",
+          "JS/js-this",
+          "JS/js-gitflow",
+          "JS/js-promise",
           ],
   },
   videos: {

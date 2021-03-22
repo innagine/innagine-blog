@@ -1,0 +1,218 @@
+---
+id: js-visible
+title: 元素在可视区域中
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 探索元素在可视区域中的奥秘
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210319105426570.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+
+## 偏移量
+
+|    偏移量    |                             概念                             |                        公式                        |
+| :----------: | :----------------------------------------------------------: | :------------------------------------------------: |
+| offsetHeight | 元素在垂直方向上占用的空间大小，以像素为单位。包括元素的高度、(可见的) 水平滚动条的高度、上下边框高度 | offsetHeght = content + padding + border + scrollX |
+| offsetWidth  | 元素在水平方向上占用的空间大小，以像素为单位。包括元素的宽度、(可见的)垂直滚动条的宽度、左右边框宽度 | offsetWidth = content + padding + border + scrollY |
+|  offsetLeft  | 元素的左外边框距离与已定位的父容器（offsetParent）的左边距离（不包括元素的边框和父容器的边框） |                                                    |
+|  offsetTop   | 元素的上外边框距离与已定位的父容器的上边距离（不包括元素的边框和父容器的边框） |                                                    |
+
+如下图：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210319105814481.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+小结：
+
+- 只读属性
+- 包括滚动条和边框，不包括外边距
+- 每次访问都要重新计算（用变量进行保存）
+
+# client 系列
+
+|  客户区大小  |                             概念                             |               公式               |
+| :----------: | :----------------------------------------------------------: | :------------------------------: |
+| clientWidth  | clientWidth 属性是元素内容区宽度加上左右内边距宽度，不包括滚动条、边框和外边距 | clientWidth = content + padding  |
+| clientHeight | 元素内容区高度加上上下内边距高度，不包括滚动条、边框和外边距 | clientHeight = content + padding |
+|  clientLeft  |                     实际上就是左边框宽度                     |     clientLeft = border-left     |
+|  clientTop   |                     实际上就是上边框宽度                     |     clientLeft = border-top      |
+
+常用于获取浏览器视口大小
+
+```js
+function getViewport(){
+    // 检查 document.compatMode 属性，以确定浏览器是否运行在混杂模式。
+    // Safari3.1 之前的版本不支持这个属性，因此就会自动执行 else 语句
+    if (document.compatMode == "BackCompat"){
+        return {
+            width: document.body.clientWidth,
+            height: document.body.clientHeight
+        };
+    } else {
+        return {
+            width: document.documentElement.clientWidth,
+            height: document.documentElement.clientHeight
+        }; 
+    }
+}
+```
+
+小结：
+
+- 只读属性
+- 每次访问都要重新计算（用变量进行保存）
+
+# 滚动 scroll 系列
+
+|   滚动大小   |                             概念                             |
+| :----------: | :----------------------------------------------------------: |
+| scrollWidth  |            在没有滚动条的情况下，元素内容的总高度            |
+| scrollHeight |            在没有滚动条的情况下，元素内容的总宽度            |
+|  scrollLeft  | 被隐藏在内容区域左侧的像素数。通过设置这个属性可以改变元素的滚动位置 |
+|  scrollTop   | 被隐藏在内容区域上方的像素数。通过设置这个属性可以改变元素的滚动位置 |
+
+- `scrollWidth` 和 `scrollHeight` 主要用于确定元素内容的实际大小
+- `scrollLeft` 和 `scrollTop` 属性既可以确定元素当前滚动的状态，也可以设置元素的滚动位置
+  - 垂直滚动 `scrollTop > 0`
+  - 水平滚动 `scrollLeft > 0`
+- 将元素的 `scrollLeft` 和 `scrollTop` 设置为 0，可以重置元素的滚动位置
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210319105921329.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+# 确定元素大小
+
+> `Element.getBoundingClientRect() ` 方法返回一个 `DOMRect` 对象，该对象提供有关元素大小及其相对于视口的位置的信息
+
+这个方法返回一个矩形对象，含4个属性：`left`、`top`、`right` 和 `bottom` 。这些属性给出了元素在页面中相对于视口的位置
+
+- top：元素上边到视窗上边的距离
+- right：元素右边到视窗左边的距离
+- bottom：元素下边到视窗上边的距离
+- left：元素左边到视窗左边的距离
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/202103191059369.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+对于不支持 `getBoundingClientRect()` 的浏览器，可以通过其他手段取得相同的信息。一般来说，`right` 和 `left` 的差值与 `offsetWidth` 的值相等，而 `bottom` 和 `top` 的差值与 `offsetHeight` 相等
+
+```js
+
+function getElementLeft(element){
+    let actualLeft = element.offsetLeft;
+    let current = element.offsetParent;
+    while (current !== null){
+        actualLeft += current.offsetLeft;
+        current = current.offsetParent;
+    }
+    return actualLeft;
+}
+
+function getElementTop(element){
+    let actualTop = element.offsetTop;
+    let current = element.offsetParent;
+    while (current !== null){
+        actualTop += current. offsetTop;
+        current = current.offsetParent;
+    }
+    return actualTop;
+}
+
+function getBoundingClientRect(element) {
+    //计算滚动条外的长度（用于去除）
+    let scrollTop = document.documentElement.scrollTop;
+    let scrollLeft = document.documentElement.scrollLeft;
+    if (element.getBoundingClientRect) {
+        //判断是否已经运行过此函数，如果已运行过，则会在arguments.callee.offset保存浏览器的数据，也就不再进入if语句块
+        if (typeof arguments.callee.offset != "number") {
+            //创建一个dom元素用于测量左上角的坐标是(0,0)还是（2，2）
+            let temp = document.createElement("div");
+            //必须绝对定位定位在左上角，不然会加到文档的末尾测量出现巨大偏差
+            temp.style.cssText = "position:absolute;left:0;top:0;"; 
+            document.body.appendChild(temp);
+            //去除窗口外的距离，如果IE<=7则
+            arguments.callee.offset = -temp.getBoundingClientRect().top - scrollTop; 
+            document.body.removeChild(temp);
+            temp = null;
+        }
+        let rect = element.getBoundingClientRect();
+        let offset = arguments.callee.offset;
+        return {
+            left: rect.left + offset,
+            right: rect.right + offset,
+            top: rect.top + offset,
+            bottom: rect.bottom + offset
+        };
+    } else {
+        let actualLeft = getElementLeft(element);
+        let actualTop = getElementTop(element);
+        return {
+            left: actualLeft - scrollLeft,
+            right: actualLeft + element.offsetWidth - scrollLeft,
+            top: actualTop - scrollTop,
+            bottom: actualTop + element.offsetHeight - scrollTop
+        }
+    }
+}
+```
+
+# 判断元素是否在可视区域
+
+### 第一种方法
+
+> el.offsetTop - document.documentElement.scrollTop <= viewPortHeight
+
+```js
+function isInViewPortOfOne (el) {
+    // viewPortHeight 兼容所有浏览器写法
+    const viewPortHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight 
+    const offsetTop = el.offsetTop
+    const scrollTop = document.documentElement.scrollTop
+    const top = offsetTop - scrollTop
+    console.log('top', top)
+     // 这里有个+100是为了提前加载+ 100
+    return top <= viewPortHeight + 100
+}
+```
+
+### 第二种方法
+
+> el.getBoundingClientReact().top <= viewPortHeight
+
+```js
+function isInViewPortOfTwo (el) {
+    const viewPortHeight = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight 
+    const top = el.getBoundingClientRect() && el.getBoundingClientRect().top
+    console.log('top', top)
+    return top  <= viewPortHeight + 100
+}
+```
+
+### 第三种方法
+
+> intersectionRatio > 0 && intersectionRatio <= 1
+
+```js
+// 定义一个交叉观察器
+const io = new IntersectionObserver(ioes => {
+    ioes.forEach(ioe => {
+        const el = ioe.target
+        const intersectionRatio = ioe.intersectionRatio
+        if (intersectionRatio > 0 && intersectionRatio <= 1) {
+            loadImg(el)
+            io.unobserve(el)
+        }
+         el.onload = el.onerror = () => io.unobserve(el)
+    })
+})
+// 执行交叉观察器
+function isInViewPortOfThree (el) {
+    io.observe(el)
+}
+```

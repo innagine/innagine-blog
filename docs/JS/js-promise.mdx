@@ -1,0 +1,611 @@
+---
+id: js-promise
+title: 手写Promise（1）
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 探索Promise的奥秘
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/2021032222383515.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+### 一、构建
+
+本次推文将会手写开发`Promise`实现，提升异步编程的能力。
+
+首先声明定义类并声明`Promise`状态与值，有以下几个细节需要注意。
+
+- `executor`为执行者
+- 当执行者出现异常时触发**拒绝**状态
+- 使用静态属性保存状态值
+- 状态只能改变一次，所以在`resolve`与`reject`添加条件判断
+- 因为 `resolve`或`rejected`方法在`executor`中调用，作用域也是`executor`作用域，这会造成`this`指向`window`，现在我们使用的是`class`定义，`this`为`undefined`
+
+```JavaScript
+class MyPromise{
+    static PENDING = 'pending';
+	static FULFILLED = 'fulfilled';
+	static REJECTED = 'rejected';
+	constructor(executor){
+        this.status = MyPromise.PENDING;
+        this.value = null;
+        try{
+            executor(this.resolve.bind(this),this.reject.bind(this));
+        } catch{
+            this.reject(error);
+        }
+    }
+	resolve(value){
+        if(this.status == MyPromise.PENDING){
+            this.status = MyPromise.FULFILLED;
+            this.value = value;
+        }
+    }
+	reject(value){
+        if(this.status == MyPromise.PENDING){
+            this.status = MyPromise.REJECTED;
+            this.value = value;
+        }
+    }
+}
+```
+
+案例代码测试：
+
+```html
+<script src ="MyPromise.js"></script>
+<script>
+    let goodJob = new MyPromise((resolve,reject)=>{
+        resolve("前端收割机！！！！")
+    });
+    console.log(goodJob); //前端收割机！！！！
+</script>
+```
+
+### 二、THEN
+
+现在添加`then`方法来处理状态的改变，有以下几点说明
+
+1. `then`可以有两个参数，即成功和错误时的回调函数
+2. `then`的函数参数都不是必须的，所以需要设置默认值为函数，用于处理当没有传递时情况
+3. 当执行`then`传递的函数发生异常时，统一交给`onRejected`来处理错误
+
+#### 1.基础构建
+
+```JavaScript
+then(onFulfilled,onRejected){
+    if(typeof onFulfilled != "function"){
+        onFulfilled = value => value;
+    }
+    if(typeof onRejected != "function"){
+        onRejected = value => value;
+    }
+    if(this.status == MyPromise.FULFILLED){
+        try{
+            onFulfilled(this.value);
+        } catch{
+            onRejected(error);
+        }
+    }
+    if(this.status == MyPromise.REJECTED){
+        try{
+            onRejected(this.value);
+        } catch{
+            onRejected(error);
+        }
+    }
+}
+```
+
+案例代码测试（then方法代码放进`MyPromise`类中）：
+
+```html
+<script src ="MyPromise.js"></script>
+<script>
+    let goodJob = new MyPromise((resolve,reject)=>{
+        resolve("前端收割机！！！！")
+    }).then(
+        value =>{
+            console.log(value);
+        },
+        reason =>{
+            console.log(reason);
+        }
+    );
+	console.log("我是主线程执行的console.log!");
+
+	// 前端收割机！！！！
+	// 我是主线程执行的console.log!
+</script>
+```
+
+#### 2.异步任务
+
+前面代码中的then方法可以正常执行，但代码产生的Promise并不是异步的，所以我们需要使用`setTimeout`来将`onFulfilled`与`onRejected`做为异步宏任务执行。
+
+```JavaScript
+then(onFulfilled,onRejected){
+    if(typeof onFulfilled != "function"){
+        onFulfilled = value => value;
+    }
+    if(typeof onRejected != "function"){
+        onRejected = value => value;
+    }
+    if(this.status == MyPromise.FULFILLED){
+        setTimeout(()=>{
+            try{
+                onFulfilled(this.value);
+            } catch(error){
+                onRejected(error);
+            }
+        });
+    }
+    if(this.status == MyPromise.REJECTED){
+        setTimeout(()=>{
+            try{
+                onRejected(this.value);
+            } catch{
+                onRejected(error);
+            }
+        });
+    }
+}
+```
+
+案例代码测试（Promise异步执行）：
+
+```html
+<script src ="MyPromise.js"></script>
+<script>
+    let goodJob = new MyPromise((resolve,reject)=>{
+        resolve("前端收割机！！！！")
+    }).then(
+        value =>{
+            console.log(value);
+        },
+        reason =>{
+            console.log(reason);
+        }
+    );
+	console.log("我是主线程执行的console.log!");
+
+	// 我是主线程执行的console.log!
+	// 前端收割机！！！！
+</script>
+```
+
+#### 3.PENDING状态
+
+目前then方法无法处理promise为pending时的状态
+
+```JavaScript
+...
+let goodJob = new MyPromise((resolve,reject)=>{
+    setTimeout(()=>{
+        resolve("前端收割机！！！！");
+    });
+})
+...
+```
+
+所以为了处理上述情况，需要进行几点改动
+
+- 在构造函数中添加callback来保存pending状态时的处理函数，当状态改变时循环调用。
+
+  ```JavaScript
+  constructor(executor){
+      ...
+      this.callbacks = [];
+      ...
+  }
+  ```
+
+- 将then方法的回调函数添加到callback数组中，用于异步执行。
+
+  ```javascript
+  then(onFulfilled,onRejected){
+      if(typeof onFulfilled != "function"){
+          onFulfilled = value => value;
+      }
+      if(typeof onRejected != "function"){
+          onRejected = value => value;
+      }
+      if(this.status == MyPromise.PENDING){
+          this.callbacks.push({
+              onFulfilled: value =>{
+                  try{
+                      onFulfilled(value);
+                  } catch(error){
+                      onRejected(error);
+                  }
+              },
+              onRejected: value =>{
+                  try{
+                      onRejected(value);
+                  } catch(error){
+                      onRejected(error);
+                  }
+              }
+          });
+      }
+      ...
+  }
+  ```
+
+  
+
+- resolve方法和reject方法中添加处理callback方法的代码。
+
+  ```javascript
+  resolve(value){
+      if(this.status == MyPromise.PENDING){
+          this.status = MyPromise.FULFILLED;
+          this.value = value;
+          this.callbacks.map(callback =>{
+              callback.onFulfilled(value);
+          });
+      }
+  }
+  reject(value){
+      if(this.status == MyPromise.PENDING){
+          this.status = MyPromise.REJECTED;
+          this.value = value;
+          this.callbacks.map(callback =>{
+              callback.onRejected(value);
+          });
+      }
+  }
+  ```
+
+#### 4.PENDING异步
+
+执行以下代码发现并不是异步操作，应该先输出 "我要先执行!" 然后是 "前端收割机！！！！"。
+
+```html
+<script src ="MyPromise.js"></script>
+<script>
+    let goodJob = new MyPromise((resolve,reject)=>{
+        setTimeout(()=>{
+            resolve("前端收割机！！！！")
+        	console.log("我要先执行!");
+        })
+    }).then(
+        value =>{
+            console.log(value);
+        },
+        reason =>{
+            console.log(reason);
+        }
+    );
+
+	// 前端收割机！！！！
+	// 我要先执行!
+</script>
+```
+
+解决以上问题，只需要将`resolve`与`reject`执行通过`setTimeout`定义为异步任务。
+
+```javascript
+resolve(value){
+    if(this.status == MyPromise.PENDING){
+        this.status = MyPromise.FULFILLED;
+        this.value = value;
+        setTimeout(()=>{
+            this.callbacks.map(callback =>{
+            	callback.onFulfilled(value);
+        	});
+        })
+    }
+}
+reject(value){
+    if(this.status == MyPromise.PENDING){
+        this.status = MyPromise.REJECTED;
+        this.value = value;
+        setTimeout(()=>{
+            this.callbacks.map(callback =>{
+            	callback.onRejected(value);
+        	});
+        })
+    }
+}
+```
+
+### 三、链式操作
+
+Promise中的then是链式调用执行的，所以then也要返回Promise才能实现
+
+1. then的onReject函数是对前面Promise的rejected的处理
+2. 但该Promise返回状态要为fulfilled，所以在调用onRejected后改变当前promise为fulfilled状态
+
+```javascript
+then(onFulfilled,onRejected) {
+    if(typeof onFulfilled != "function"){
+        onFullfilled = value =>value;
+    }
+    if(typeof onRejected != "function"){
+        onRejected = value => value;
+    }
+    return new MyPromise((resolve,reject) =>{
+        if(this.status == MyPromise.PENDING){
+            this.callbacks.push({
+                onFUlfilled: value =>{
+                    try{
+                        let  result = onFulfilled(value);
+                        resolve(result);
+                    } catch(error){
+                        reject(error);
+                    }
+                },
+                onRejected: value =>{
+                    try{
+                        let result = onRejected(value);
+                        resolve(result);
+                    } catch(error){
+                        reject(error);
+                    }
+                }
+            });
+        }
+        if(this.status == MyPromise.FULFILLED){
+            setTimeout(()=>{
+                try{
+                    let result = onFulfilled(this.value);
+                    resolve(result);
+                } catch(error){
+                    reject(error);
+                }
+            });
+        }
+        if(this.status == MyPromise.REJECTED){
+            setTime(()=>{
+                try{
+                    let result = onRejected(this.value);
+                    resolve(result);
+                } catch(error){
+                    reject(error);
+                }
+            });
+        }
+    });
+}
+```
+
+案例代码测试：
+
+```html
+<script src ="MyPromise.js"></script>
+<script>
+    let goodJob = new MyPromise((resolve,reject)=>{
+        setTimeout(()=>{
+            resolve("前端收割机！！！！")
+        	console.log("我要先执行!");
+        })
+    }).then(
+        value =>{
+            console.log(value);
+            return value;
+        },
+        reason =>{
+            console.log(reason);
+        }
+    ).then(
+        value =>{
+            console.log(value);
+        },
+        reason =>{
+            console.log(reason);
+        }
+    )
+
+	// 我要先执行!
+	// 前端收割机！！！！
+	// 前端收割机！！！！
+</script>
+```
+
+### 四、返回类型
+
+如果then返回的值为Promise，我们需要如何处理？所以我们需要判断分别处理返回值为Promise与普通值的情况。
+
+- 基本实现
+
+```JavaScript
+then(onFulfilled,onRejected) {
+    if(typeof onFulfilled != "function"){
+        onFullfilled = value =>value;
+    }
+    if(typeof onRejected != "function"){
+        onRejected = value => value;
+    }
+    return new MyPromise((resolve,reject) =>{
+        if(this.status == MyPromise.PENDING){
+            this.callbacks.push({
+                onFUlfilled: value =>{
+                    try{
+                        let  result = onFulfilled(value);
+                        if(result instanceof MyPromise){
+                            result.then(resolve,reject);
+                        }else{
+                            resolve(result);
+                        }
+                    } catch(error){
+                        reject(error);
+                    }
+                },
+                onRejected: value =>{
+                    try{
+                        let result = onRejected(value);
+                        if(result instanceof MyPromise){
+                            result.then(resolve,reject);
+                        }else{
+                            resolve(result);
+                        }
+                    } catch(error){
+                        reject(error);
+                    }
+                }
+            });
+        }
+        if(this.status == MyPromise.FULFILLED){
+            setTimeout(()=>{
+                try{
+                    let result = onFulfilled(this.value);
+                    if(result instanceof MyPromise){
+                         result.then(resolve,reject);
+                    }else{
+                         resolve(result);
+                    }
+                } catch(error){
+                    reject(error);
+                }
+            });
+        }
+        if(this.status == MyPromise.REJECTED){
+            setTime(()=>{
+                try{
+                    let result = onRejected(this.value);
+                    if(result instanceof MyPromise){
+                         result.then(resolve,reject);
+                    }else{
+                         resolve(result);
+                    }
+                } catch(error){
+                    reject(error);
+                }
+            });
+        }
+    });
+}
+```
+
+- 代码复用
+
+现在发现`pendding`、`fulfilled`、`rejected` 状态的代码非常相似，所以可以提取出方法`Parse`来复用
+
+```javascript
+then(onFulfilled,onRejected) {
+    if(typeof onFulfilled != "function"){
+        onFullfilled = value =>value;
+    }
+    if(typeof onRejected != "function"){
+        onRejected = value => value;
+    }
+    return new MyPromise((resolve,reject) =>{
+        if(this.status == MyPromise.PENDING){
+            this.callbacks.push({
+                onFUlfilled: value =>{
+                    this.parse(onFulfilled(this.value),resolve,reject);
+                },
+                onRejected: value =>{
+                    this.parse(onRejected(this.value),resolve,reject);
+                }
+            });
+        }
+        if(this.status == MyPromise.FULFILLED){
+            setTimeout(()=>{
+                this.parse(onFulfilled(this.value),resolve,reject);
+            });
+        }
+        if(this.status == MyPromise.REJECTED){
+            setTime(()=>{
+                this.parse(onRejected(this.value),resolve,reject);
+            });
+        }
+    });
+}
+parse(result,resolve,reject){
+    try{
+        if(result instanceof MyPromise){
+            result.then(resolve,reject);
+        }else{
+            resolve(result);
+        }
+    } catch(error){
+        reject(error);
+    }
+}
+```
+
+- 返回约束
+
+then的返回的promise不能是then相同的Promise，下面是原生Promise的示例将产生错误
+
+```javascript
+let promise = new Promise(resolve => {
+  setTimeout(() => {
+    resolve("前端收割机！！！！");
+  });
+});
+promise = promise.then(value => {
+  return promise;
+});
+
+//error : Uncaught (in promise) TypeError: Chaining cycle detected for promise #<Promise>
+```
+
+解决上面的问题来完善代码，添加当前promise做为parse的第一个参数与函数结果比对
+
+```javascript
+then(onFulfilled,onRejected) {
+    if(typeof onFulfilled != "function"){
+        onFullfilled = value =>value;
+    }
+    if(typeof onRejected != "function"){
+        onRejected = value => value;
+    }
+    let promise = new MyPromise((resolve,reject) =>{
+        if(this.status == MyPromise.PENDING){
+            this.callbacks.push({
+                onFUlfilled: value =>{
+                    this.parse(onFulfilled(this.value),resolve,reject);
+                },
+                onRejected: value =>{
+                    this.parse(onRejected(this.value),resolve,reject);
+                }
+            });
+        }
+        if(this.status == MyPromise.FULFILLED){
+            setTimeout(()=>{
+                this.parse(onFulfilled(this.value),resolve,reject);
+            });
+        }
+        if(this.status == MyPromise.REJECTED){
+            setTime(()=>{
+                this.parse(onRejected(this.value),resolve,reject);
+            });
+        }
+    });
+    return promise;
+}
+parse(result,resolve,reject){
+    try{
+        if(result instanceof MyPromise){
+            result.then(resolve,reject);
+        }else{
+            resolve(result);
+        }
+    } catch(error){
+        reject(error);
+    }
+}
+```
+
+案例测试（现在进行测试也可以得到原生一样效果了）
+
+```html
+<script src ="MyPromise.js"></script>
+<script>
+    let goodJob = new MyPromise(resolve => {
+    	resolve("前端收割机！！！！");
+	});
+	goodJob = goodJob.then(value => {
+  		return goodJob;
+	});
+	
+	//error : Uncaught (in promise) TypeError: Chaining cycle detected for promise #<Promise>
+</script>
+```
