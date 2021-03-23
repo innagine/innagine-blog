@@ -3,7 +3,7 @@
  * @Author: IMAGINE
  * @Date: 2021-01-05 10:41:39
  * @LastEditors: IMAGINE
- * @LastEditTime: 2021-03-22 23:13:14
+ * @LastEditTime: 2021-03-24 00:31:54
  */
 /**
  * Copyright (c) 2017-present, Facebook, Inc.
@@ -46,6 +46,7 @@ module.exports = {
           "JS/js-this",
           "JS/js-gitflow",
           "JS/js-promise",
+          "JS/js-promise2",
           ],
   },
   videos: {
