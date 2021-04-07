@@ -1,0 +1,346 @@
+---
+id: js-copy
+title: 手写浅拷贝与深拷贝
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 继续探索浅拷贝与深拷贝的奥秘
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210330123834790.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+### 一、概念
+
+#### 1.浅拷贝（浅克隆）
+
+创建一个新对象，这个对象有着原始对象属性值的一份精确拷贝。如果属性是基本类型，拷贝的就是基本类型的值，如果属性是引用类型，拷贝的就是内存地址 ，所以如果其中一个对象改变了这个地址中的值，就会影响到另一个对象。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210330123848112.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+#### 2.深拷贝（深克隆）
+
+将一个对象从内存中完整的拷贝一份出来,从堆内存中开辟一个新的区域存放新对象,且修改新对象不会影响原对象。
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210330123900768.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+### 二、实现
+
+#### 1.浅拷贝
+
+创建一个新的对象，遍历需要克隆的对象，将需要克隆对象的属性依次添加到新对象上，然后返回。
+
+```JavaScript
+function clone(target) {
+    let cloneTarget = {};
+    for (const key in target) { // 通过for in 遍历被克隆对象属性
+        cloneTarget[key] = target[key];
+    }
+    return cloneTarget;
+};
+```
+
+#### 2.深拷贝
+
+如果是深拷贝的话，考虑到我们要拷贝的对象是不知道有多少层深度的，我们可以用递归来解决问题，稍微改写上面的代码：
+
+1. 如果是原始类型，无需继续拷贝，直接返回
+2. 如果是引用类型，创建一个新的对象，遍历需要克隆的对象，将需要克隆对象的属性执行**深拷贝后**依次添加到新对象上。
+
+简而言之，如果有更深层次的对象可以继续递归直到属性为原始类型，这样我们就完成了一个最简单的深拷贝。
+
+##### （1）基础版本
+
+```JavaScript
+function clone(target) {
+    if (typeof target === 'object') { // 判断传入属性是否为对象
+        let cloneTarget = {}; //新建克隆对象
+        for (const key in target) { // 通过for in 遍历被克隆对象属性
+            cloneTarget[key] = clone(target[key]); // 递归调用方法
+        }
+        return cloneTarget; // 返回克隆对象
+    } else {
+        return target; // 如果属性值不是对象，直接返回元素类型值
+    }
+};
+```
+
+##### （2）考虑数组
+
+在上面的版本中，我们的初始化结果只考虑了普通的`object`，下面我们只需要把初始化代码稍微一变，就可以兼容数组了。
+
+```JavaScript
+module.exports = function clone(target) {
+    if (typeof target === 'object') { // 判断传入属性是否为对象
+        //新建克隆对象，如果属性值为数组，则新建数组
+        let cloneTarget = Array.isArray(target) ? [] : {}; 
+        for (const key in target) { // 通过for in 遍历被克隆对象属性
+            cloneTarget[key] = clone(target[key]); // 递归调用方法
+        }
+        return cloneTarget; // 返回克隆对象
+    } else {
+        return target; // 如果属性值不是对象，直接返回元素类型值
+    }
+};
+```
+
+##### （3）避免循环引用
+
+使用上面的代码，我们执行下面这样一个测试用例：
+
+```JavaScript
+const target = {
+    field1: 1,
+    field2: undefined,
+    field3: {
+        child: 'child'
+    },
+    field4: [2, 4, 8]
+};
+target.target = target;
+```
+
+可以看到下面的结果：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210330123920239.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+很明显，因为递归进入死循环导致栈内存溢出了。
+
+原因就是上面的对象存在循环引用的情况，即对象的属性间接或直接的引用了自身的情况。
+
+解决循环引用问题，我们可以额外开辟一个存储空间，来存储当前对象和拷贝对象的对应关系，当需要拷贝当前对象时，先去存储空间中找，有没有拷贝过这个对象，如果有的话直接返回，如果没有的话继续拷贝，这样就巧妙化解的循环引用的问题。
+
+这个存储空间，需要可以存储`key-value`形式的数据，且`key`可以是一个引用类型，我们可以选择`Map`这种数据结构：
+
+1. 检查`map`中有无克隆过的对象
+2. 有就直接返回
+3. 没有 - 将当前对象作为`key`，克隆对象作为`value`进行存储
+4. 继续克隆
+
+```JavaScript
+function clone(target, map = new Map()) {
+    if (typeof target === 'object') {
+        let cloneTarget = Array.isArray(target) ? [] : {};
+        if (map.get(target)) { // 检查map中有无克隆过的对象
+            return map.get(target); // 有，就直接返回
+        }
+        // 没有，就将当前对象作为key，克隆对象作为value进行存储
+        map.set(target, cloneTarget); 
+        for (const key in target) {
+            cloneTarget[key] = clone(target[key], map);
+        }
+        return cloneTarget;
+    } else {
+        return target;
+    }
+};
+```
+
+再来执行上面的测试用例：
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210330123934719.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+可以看到，执行没有报错，且`target`属性，变为了一个`Circular`类型，即循环应用的意思。
+
+##### （4）避免强引用（使用弱引用）
+
+接下来，我们可以使用，`WeakMap`提代`Map`来使代码达到画龙点睛的作用。
+
+```javascript
+function clone(target, map =  new WeakMap()) {
+    if (typeof target === 'object') {
+        let cloneTarget = Array.isArray(target) ? [] : {};
+        if (map.get(target)) { // 检查map中有无克隆过的对象
+            return map.get(target); // 有，就直接返回
+        }
+        // 没有，就将当前对象作为key，克隆对象作为value进行存储
+        map.set(target, cloneTarget); 
+        for (const key in target) {
+            cloneTarget[key] = clone(target[key], map);
+        }
+        return cloneTarget;
+    } else {
+        return target;
+    }
+};
+```
+
+`WeakMap` 对象是一组键/值对的集合，其中的键是弱引用的。其键必须是对象，而值可以是任意的。
+
+弱引用：在计算机程序设计中，弱引用与强引用相对，是指不能确保其引用的对象不会被垃圾回收器回收的引用。 一个对象若只被弱引用所引用，则被认为是不可访问（或弱可访问）的，并因此可能在任何时刻被回收。
+
+设想一下，如果我们要拷贝的对象非常庞大时，使用`Map`会对内存造成非常大的额外消耗，而且我们需要手动清除`Map`的属性才能释放这块内存，而`WeakMap`会帮我们巧妙化解这个问题。
+
+##### （5）获取数据类型
+
+每一个引用类型都有`toString`方法，默认情况下，`toString()`方法被每个`Object`对象继承。如果此方法在自定义对象中未被覆盖，t`oString()` 返回 `"[object type]"`，其中type是对象的类型。
+
+注意，上面提到了如果此方法在自定义对象中未被覆盖，`toString`才会达到预想的效果，事实上，大部分引用类型比如`Array、Date、RegExp`等都重写了`toString`方法。
+
+我们可以直接调用`Object`原型上未被覆盖的`toString()`方法，使用`call`来改变`this`指向来达到我们想要的效果。
+
+```JavaScript
+function getType(target) {
+    return Object.prototype.toString.call(target);
+}
+```
+
+##### （6）可遍历类型
+
+上面我们已经考虑的`object`、`array`都属于可以继续遍历的类型，因为它们内存都还可以存储其他数据类型的数据，另外还有`Map`，`Set`等都是可以继续遍历的类型，这里我们只考虑这四种，如果你有兴趣可以继续探索其他类型。
+
+有序这几种类型还需要继续进行递归，我们首先需要获取它们的初始化数据，例如上面的`[]`和`{}`，我们可以通过拿到`constructor`的方式来通用的获取。
+
+例如：`const target = {}`就是`const target = new Object()`的语法糖。另外这种方法还有一个好处：因为我们还使用了原对象的构造方法，所以它可以保留对象原型上的数据，如果直接使用普通的`{}`，那么原型必然是丢失了的。
+
+```javascript
+function getInit(target) {
+    const Ctor = target.constructor;
+    return new Ctor();
+}
+```
+
+##### （7）克隆函数
+
+首先，我们可以通过`prototype`来区分下箭头函数和普通函数，箭头函数是没有`prototype`的。
+
+我们可以直接使用`eval`和函数字符串来重新生成一个箭头函数，注意这种方法是不适用于普通函数的。
+
+我们可以使用正则来处理普通函数：
+
+分别使用正则取出函数体和函数参数，然后使用`new Function ([arg1[, arg2[, ...argN]],] functionBody)`构造函数重新构造一个新的函数。
+
+```JavaScript
+function cloneFunction(func) {
+    const bodyReg = /(?<={)(.|\n)+(?=})/m;
+    const paramReg = /(?<=\().+(?=\)\s+{)/;
+    const funcString = func.toString();
+    if (func.prototype) {
+        console.log('普通函数');
+        const param = paramReg.exec(funcString);
+        const body = bodyReg.exec(funcString);
+        if (body) {
+            console.log('匹配到函数体：', body[0]);
+            if (param) {
+                const paramArr = param[0].split(',');
+                console.log('匹配到参数：', paramArr);
+                return new Function(...paramArr, body[0]);
+            } else {
+                return new Function(body[0]);
+            }
+        } else {
+            return null;
+        }
+    } else {
+        return eval(funcString);
+    }
+}
+```
+
+### 三、实例
+
+#### 1.浅拷贝
+
+```JavaScript
+const shallowClone = (target) => {
+  if (typeof target === 'object' && target !== null) {
+    const cloneTarget = Array.isArray(target) ? []: {}
+    for (let prop in target) {
+      if (target.hasOwnProperty(prop)) { // 是否是自身（非继承）属性
+          cloneTarget[prop] = target[prop] // 只考虑一层对象
+      }
+    }
+    return cloneTarget
+  } else {
+    return target // 基础类型直接返回
+  }
+}
+
+// 对于数组对象，或者你可以
+console.log(Object.assign(array, ...sources))
+console.log(array.concat())
+console.log(array.slice())
+console.log([...array])
+```
+
+#### 2.深拷贝
+
+- 快速版
+  1. 无法解决 `循环引用`。
+  2. 无法拷贝特殊的对象，比如 `函数、RegExp、Date、Set、Map` 等。
+
+```JavaScript
+JSON.parse(JSON.stringify());
+```
+
+- 较完整版
+
+```JavaScript
+// Map 强引用，需要手动清除属性才能释放内存。
+// WeakMap 弱引用，随时可能被垃圾回收，使内存及时释放，是解决循环引用的不二之选。
+function cloneDeep(obj, map = new WeakMap()) {
+  if (obj === null || obj === undefined) return obj // 不进行拷贝
+  if (obj instanceof Date) return new Date(obj)
+  if (obj instanceof RegExp) return new RegExp(obj)
+  // 基础类型不需要深拷贝
+  if (typeof obj !== 'object' && typeof obj !== 'function') return obj
+  // 处理普通函数和箭头函数
+  if (typeof obj === 'function') return handleFunc(obj)
+  // 是对象的话就要进行深拷贝
+  if (map.get(obj)) return map.get(obj)
+  let cloneObj = new obj.constructor()
+  // 找到的是所属类原型上的 constructor，而原型上的 constructor 指向的是当前类本身。
+  map.set(obj, cloneObj)
+  
+  if (getType(obj) === '[object Map]') {
+    obj.forEach((item, key) => {
+      cloneObj.set(cloneDeep(key, map), cloneDeep(item, map));
+    })
+  }
+  if (getType(obj) === '[object Set]') {
+    obj.forEach(item => {
+      cloneObj.add(cloneDeep(item, map));
+    })
+  }
+  for (let key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      cloneObj[key] = deepClone(obj[key], map)
+    }
+  }
+  return cloneObj
+}
+
+// 获取更详细的数据类型
+function getType(obj) {
+    return Object.prototype.toString.call(obj)
+}
+// 处理普通函数和箭头函数
+function handleFunc(func) {
+  if(!func.prototype) return func // 箭头函数直接返回自身
+  const bodyReg = /(?<={)(.|\n)+(?=})/m
+  const paramReg = /(?<=\().+(?=\)\s+{)/
+  const funcString = func.toString()
+  // 分别匹配 函数参数 和 函数体
+  const param = paramReg.exec(funcString)
+  const body = bodyReg.exec(funcString)
+  if(!body) return null
+  if (param) {
+    const paramArr = param[0].split(',')
+    return new Function(...paramArr, body[0])
+  } else {
+    return new Function(body[0])
+  }
+}
+```
+
+### 四、总结
+
+
+通过对于手写深浅拷贝，可以体会到递归、循环引用、`weakMap`、创建各种引用类型的方法、判断数据类型、箭头函数与普通函数的区别、正则表达式等知识。希望大家能深入地了解深浅拷贝的真正含义，然后收获满满。

@@ -1,0 +1,220 @@
+---
+id: js-emitter
+title: 手写EventEmitter
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 继续探索EventEmitter的奥秘
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210402012455843.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+### 一、概念
+
+#### 1.EventEmitter
+
+`EventEmitter` （事件派发器）是 `Node.js` 的核心模块 `events` 中的类，用于对 `Node.js` 中的事件进行统一管理，用 `events` 特定的 `API` 对事件进行添加、触发和移除等等，`EventEmitter` 的核心就是事件触发与事件监听器功能的封装。
+
+简而言之，`EventEmitter`就是一个典型的发布订阅模式，实现了事件调度中心。
+
+`javascript`中常被提及的「发布订阅模式」，在面试的过程中，面试官往往会让你通过手写`EventEmitter`的方式来观察你对于这个模式的理解。
+
+#### 2.发布订阅模式
+
+发布订阅模式其实是一种对象间一对多的依赖关系，当一个对象的状态发生改变时，所有依赖于它的对象都将得到状态改变的通知。
+
+发布订阅模式中，包含发布者，事件调度中心，订阅者三个角色。发布者和订阅者是松散耦合的，互不关心对方是否存在，他们关注的是事件本身。发布者借用事件调度中心提供的`publish`方法发布事件，而订阅者则通过`subscribe`进行订阅。
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210402012507703.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+特点
+
+- 发布订阅模式中，对于发布者`Publisher`和订阅者`Subscriber`没有特殊的约束，他们好似是匿名活动，借助事件调度中心提供的接口发布和订阅事件，互不了解对方是谁。
+- 松散耦合，灵活度高，常用作事件总线。
+- 易理解，可类比于`DOM`事件中的`dispatchEvent`和`addEventListener`。
+
+缺点
+
+- 当事件类型越来越多时，难以维护，需要考虑事件命名的规范，也要防范数据流混乱。
+
+### 二、实现
+
+#### 1.EventEmitter
+
+```javascript
+class EventEmitter {
+    constructor() {
+        // 维护事件及监听者
+        this.listeners = {}
+    }
+    /**
+     * 注册事件监听者
+     * @param {String} type 事件类型
+     * @param {Function} callback 回调函数
+     */
+    on(type, callback) {
+        if (!this.listeners[type]) {  // 如果该事件类型不存在
+            this.listeners[type] = [] // 为该事件类型设置数组，存放回调函数
+        }
+        this.listeners[type].push(callback) // 将回调函数放入该事件类型数组
+    }
+    /**
+     * 发布事件
+     * @param {String} type 事件类型
+     * @param  {...any} args 参数列表，把emit传递的参数赋给回调函数
+     */
+    emit(type, ...args) {
+        if (this.listeners[type]) { // 如果该事件类型存在
+            this.listeners[type].forEach(callback => {
+                callback(...args) // 调用该事件类型数组中的每一个回调函数，并传入参数
+            })
+        }
+    }
+    /**
+     * 移除某个事件的一个监听者
+     * @param {String} type 事件类型
+     * @param {Function} callback 回调函数
+     */
+    off(type, callback) {
+        if (this.listeners[type]) {
+            // 查询传入回调函数在该事件类型数组中的下标，并将其下标用targetIndex存储
+            const targetIndex = this.listeners[type].findIndex(item => item === callback)
+            if (targetIndex !== -1) { // 说明该回调函数存在于事件类型数组中
+                this.listeners[type].splice(targetIndex, 1) // 删除该回调函数
+            }
+            if (this.listeners[type].length === 0) { // 该事件类型数组为空
+                delete this.listeners[type] // 删除该事件类型
+            }
+        }
+    }
+    /**
+     * 移除某个事件的所有监听者
+     * @param {String} type 事件类型
+     */
+    offAll(type) {
+        if (this.listeners[type]) { // 如果该事件类型数组存在
+            delete this.listeners[type] // 直接删除该事件类型
+        }
+    }
+}
+
+```
+
+使用：
+
+```javascript
+// 创建事件管理器实例
+const ee = new EventEmitter()
+
+// 注册一个imagine事件监听者
+ee.on('imagine', function() { console.log('前端收割机') })
+
+// 发布事件imagine
+ee.emit('imagine')
+// 前端收割机
+
+// 也可以emit传递参数
+ee.on('imagine', function(name,address) { console.log(`大家好，我是${name},我来自${address}！`) })
+ee.emit('imagine', '前端收割机','广东') // 此时会打印两条信息，因为前面注册了两个imagine事件的监听者
+// 前端收割机
+// 大家好，我是前端收割机，我来自广东！
+
+// 测试移除事件监听
+const BeRemovedListener = function() { console.log('我是一个可以被移除的监听者') }
+
+// 注册一个TestOff事件监听者
+ee.on('TestOff', BeRemovedListener)
+
+// 发布事件TestOff
+ee.emit('TestOff')
+// 我是一个可以被移除的监听者
+
+// 移除事件监听
+ee.off('TestOff', BeRemovedListener)
+ee.emit('TestOff') // 此时事件监听已经被移除，不会再有console.log打印出来了
+
+// 测试移除imagine的所有事件监听
+ee.offAll('imagine')
+console.log(ee) // 此时可以看到ee.listeners已经变成空对象了，再emit发送imagine事件也不会有反应了
+```
+
+补充：
+
+`findIndex()` 方法返回传入一个测试条件（函数）符合条件的数组第一个元素位置。
+
+`findIndex()` 方法为数组中的每个元素都调用一次函数执行：
+
+- 当数组中的元素在测试条件时返回 `true` 时, `findIndex()` 返回符合条件的元素的索引位置，之后的值不会再调用执行函数。
+- 如果没有符合条件的元素返回 -1
+
+**注意:** 
+
+- `findIndex()` 对于空数组，函数是不会执行的。
+- `findIndex()` 并没有改变数组的原始值。
+
+#### 2.发布订阅模式
+
+```javascript
+class PubSub {
+    constructor() {
+        // 维护事件及订阅行为
+        this.events = {}
+    }
+    /**
+     * 注册事件订阅行为
+     * @param {String} type 事件类型
+     * @param {Function} callback 回调函数
+     */
+    subscribe(type, callback) {
+        if (!this.events[type]) {
+            this.events[type] = []
+        }
+        this.events[type].push(callback)
+    }
+    /**
+     * 发布事件
+     * @param {String} type 事件类型
+     * @param  {...any} args 参数列表
+     */
+    publish(type, ...args) {
+        if (this.events[type]) {
+            this.events[type].forEach(callback => {
+                callback(...args)
+            })
+        }
+    }
+    /**
+     * 移除某个事件的一个订阅行为
+     * @param {String} type 事件类型
+     * @param {Function} callback 回调函数
+     */
+    unsubscribe(type, callback) {
+        if (this.events[type]) {
+            const targetIndex = this.events[type].findIndex(item => item === callback)
+            if (targetIndex !== -1) {
+                this.events[type].splice(targetIndex, 1)
+            }
+            if (this.events[type].length === 0) {
+                delete this.events[type]
+            }
+        }
+    }
+    /**
+     * 移除某个事件的所有订阅行为
+     * @param {String} type 事件类型
+     */
+    unsubscribeAll(type) {
+        if (this.events[type]) {
+            delete this.events[type]
+        }
+    }
+}
+```
+
+### 三、总结
+
+在`EventEmitter` （事件派发器）类中，每一个监听者（回调函数）相当于发布订阅模式中的订阅者`Subscriber`，而每一次发布事件相当于发布订阅模式中发布者`Publisher`的发布行为。

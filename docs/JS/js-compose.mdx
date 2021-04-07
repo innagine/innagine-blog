@@ -1,0 +1,225 @@
+---
+id: js-compose
+title: 手写实现函数组合（compose）
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 继续探索函数组合（compose）的奥秘
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210329002337836.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+### 一、概念
+
+compose 是函数式编程中很重要的函数之一， 因为其巧妙的设计而被广泛使用。compose 函数的作用就是组合函数的，将函数串联起来执行，将多个函数组合起来，一个函数的输出结果是另一个函数的输入参数，一旦第一个函数开始执行，就会像多米诺骨牌一样推导执行了。
+
+组合的概念是非常直观的，并不是函数式编程独有的，在我们生活中或者前端开发中处处可见。
+
+比如我们现在流行的 SPA (单页面应用)，都会有组件的概念，为什么要有组件的概念呢，因为它的目的就是想让你把一些通用的功能或者元素组合抽象成可重用的组件，就算不通用，你在构建一个复杂页面的时候也可以拆分成一个个具有简单功能的组件，然后再组合成你满足各种需求的页面。
+
+其实函数组合也是类似，函数组合就是一种将已被分解的简单任务组合成复杂任务的过程。
+
+按照我们对组合的理解，现假定有`compose`函数可以实现如下功能：
+
+```javascript
+function compose(...fns){
+    //忽略
+}
+// compose(f,g)(x) === f(g(x))
+// compose(f,g,m)(x) === f(g(m(x)))
+// compose(f,g,m)(x) === f(g(m(x)))
+// compose(f,g,m,n)(x) === f(g(m(n(x))))
+//···
+```
+
+我们可以看到`compose`函数，会接收若干个函数作为参数，每个函数执行后的输出作为下一个函数的输出，直至最后一个函数的输出作为最终的结果。
+
+### 二、应用
+
+在创建并完善我们自己的`compose`函数前，我们先来学习一下如何应用`compose`函数。
+
+假定有这样一个需求：对一个给定的数字四舍五入求值，数字为字符型。
+
+常规实现：
+
+```javascript
+let n = '3.56';
+let data = parseFloat(n);
+let result = Math.round(data); 
+// 最终结果 result为4 
+```
+
+在这段代码中，可以看到`parseFloat`函数的输出作为输入传递给`Math.round`函数以获得最终结果，这是`compose`函数能够解决的典型问题。
+
+用`compose`函数改写：
+
+```JavaScript
+let n = '3.56';
+let number = compose(Math.round,parseFloat);
+let result = number(n); 
+// 最终结果 result为4 
+```
+
+这段代码的核心是通过`compose`将`parseFloat`和`Math.round`组合到一起，返回一个新函数`number`。
+
+这个组合的过程就是函数式组合！我们将两个函数组合在一起以便能及时的构造出一个新函数！
+
+再举一个例子，假设我们有两个函数：
+
+```JavaScript
+let splitIntoSpaces = (str) => return str.split(' ');
+let count = (array) => return array.length;
+```
+
+现希望构建一个新函数以便计算一个字符串中单词的数量，可以很容易的实现：
+
+```JavaScript
+let countWords = compose(count,splitIntoSpaces);
+```
+
+调用一下：
+
+```javascript
+let result = countWords('hello your reading about composition'); 
+// 最终结果 result为5
+```
+
+### 三、实现
+
+#### 1.实现组合
+
+先回看`compose`函数到底做了什么事：
+
+```javascript
+// compose(f,g)(x) === f(g(x))
+// compose(f,g,m)(x) === f(g(m(x)))
+// compose(f,g,m)(x) === f(g(m(x)))
+// compose(f,g,m,n)(x) === f(g(m(n(x))))
+//···
+```
+
+概括来说，就是接收若干个函数作为参数，返回一个新函数。新函数执行时，按照`由右向左`的顺序依次执行传入`compose`中的函数，每个函数的执行结果作为为下一个函数的输入，直至最后一个函数的输出作为最终的输出结果。
+
+如果`compose`函数接收的函数数量是固定的，那么实现起来很简单也很好理解。
+
+只接收两个参数：
+
+```javascript
+function compose(f,g){
+    return function(x){
+        return f(g(x));
+    }
+}
+```
+
+只接收三个参数：
+
+```JavaScript
+function compose(f,g,m){
+    return function(x){
+        return f(g(m(x)));
+    }
+}
+```
+
+上面的代码，没什么问题，但是我们要考虑的是`compose`接收的参数个数是不确定的，我们考虑用rest参数来接收：
+
+```JavaScript
+function compose(...fns){
+    return function(x){
+        //···
+    }
+}
+```
+
+现在`compose`接收的参数`fns`是一个数组，那么现在思考的问题变成了，如何将数组中的函数`从右至左`依次执行。
+
+我们选择数组的`reduce`函数来实现:
+
+```JavaScript
+function compose(...fns) {
+  return function(x){
+    return fns.reverse().reduce(function(arg, fn, index){
+      return fn(arg);
+    }, x);
+  }
+}
+```
+
+我们选择数组的`reduceRight`函数来实现:
+
+```javascript
+function compose(...fns){
+    return function(x){
+        return fns.reduceRight(function(arg,fn){
+            return fn(arg);
+        },x)
+    }
+}
+```
+
+**补充：**
+
+1.`reduce()`方法
+
+`reduce()`方法接收一个函数`callbackfn`作为累加器（accumulator），数组中的每个值（从左到右）开始合并，最终为一个值。
+
+语法：
+
+```css
+array.reduce(callbackfn,[initialValue]) 
+```
+
+`reduce()`方法接收`callbackfn`函数，而这个函数包含四个参数：
+
+```javascript
+function callbackfn(preValue,curValue,index,array){} 
+```
+
+- **`preValue`**: 上一次调用回调返回的值，或者是提供的初始值（`initialValue`）
+- **`curValue`**: 数组中当前被处理的数组项
+- **`index`**: 当前数组项在数组中的索引值
+- **`array`**: 调用 `reduce()`方法的数组
+
+而`initialValue`作为第一次调用 `callbackfn`函数的第一个参数。
+
+2.`reduceRight()`方法
+
+`reduceRight()`方法的功能和`reduce()`功能是一样的，不同的是`reduceRight()`从数组的末尾向前将数组中的数组项做累加。
+
+`reduceRight()`首次调用回调函数`callbackfn`时，`prevValue` 和 `curValue` 可以是两个值之一。如果调用 `reduceRight()` 时提供了 `initialValue` 参数，则 `prevValue` 等于 `initialValue`，`curValue` 等于数组中的最后一个值。如果没有提供 `initialValue` 参数，则 `prevValue` 等于数组最后一个值， `curValue` 等于数组中倒数第二个值。
+
+#### 2.实现管道
+
+`compose`的数据流是`从右至左`的，因为最右侧的函数首先执行，最左侧的函数最后执行！
+
+但有些人喜欢`从左至右`的执行方式，即最左侧的函数首先执行，最右侧的函数最后执行！
+
+从左至右处理数据流的过程称之为管道(pipeline)!
+
+`管道(pipeline)`的实现同`compose`的实现方式很类似，因为二者的区别仅仅是数据流的方向不同而已。
+
+对比`compose`函数的实现，仅需将`reduceRight`替换为`reduce`即可：
+
+```JavaScript
+function pipe(...fns){
+    return function(x){
+        return fns.reduce(function(arg,fn){
+            return fn(arg);
+        },x)
+    }
+}
+```
+
+与`组合`相比，有些人更喜欢`管道`。这只是个人偏好，与底层实现无关。重点是`pipe`和`compose`做同样的是事情，只是数据流放行不同而已！我们可以在代码中使用`pipe`或`compose`，但不要同时使用，因为这会在团队成员中引起混淆。如果要使用，请坚持只用一种组合的风格。
+
+### 四、总结
+
+组合的方式就是抽象单一功能的函数，然后将这些函数进行再组合，从而达到实现复杂功能的目的，这样不仅使代码逻辑更加清晰，也给维护带来巨大的方便。
+
+
+（求点赞关注）参考连接：https://juejin.cn/post/6844903910834962446#heading-5

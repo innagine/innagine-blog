@@ -1,0 +1,257 @@
+---
+id: js-flat
+title: 手写数组扁平化flat方法
+# hide_title: false
+# hide_table_of_contents: false
+# sidebar_label: Markdown :)
+description: 继续探索数组扁平化flat的奥秘
+keywords:
+  - js
+  - frontend
+---
+
+![在这里插入图片描述](https://img-blog.csdnimg.cn/20210326010003607.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+
+
+本次推文将会带领大家通过手写来达到模拟数组拍平（扁平化） flat 方法实现。
+
+在一些大厂的面试中，flat方法的实现往往是一道比较基础的面试题，通常出现在笔试或者第一轮面试当中，主要考察基本的手写代码的能力。首先我们先来回顾一下flat方法概念。
+
+### 一、概念
+
+##### 1.数组扁平化方法 `Array.prototype.flat()` 也叫数组拍平、数组拉平、数组降维。
+
+```javascript
+const arr = [1,[2,3],[4,[5,[6]],7]];
+
+// 不传参数时，默认“拉平”一层
+arr.flat() 
+// [1,2,3,4,[5,[6]],7];
+
+// 传入一个整数参数，整数即“拉平”的层数
+arr.flat(2) 
+// [1,2,3,4,5,[6],7];
+
+// Infinity 关键字作为参数时，无论多少层嵌套，都会转为一维数组
+arr.flat(Infinity);
+// [1,2,3,4,5,6,7];
+
+// 传入 <=0 的整数将返回原数组，不“拉平”
+arr.flat(0);
+// [1,[2,3],[4,[5,[6]],7]]
+arr.flat(-6);
+// [1,[2,3],[4,[5,[6]],7]]
+
+// 如果原数组有空位，flat()方法会跳过空位
+[1,2,3,4,5,6,,].flat();
+// [1,2,3,4,5,6]
+```
+
+##### 2.`Array.prototype.flat()` 特性总结
+
+- `Array.prototype.flat()` 用于将嵌套的数组“拉平”，变成一维的数组。该方法返回一个新数组，对原数据没有影响。
+- 不传参数时，默认“拉平”一层，可以传入一个整数，表示想要“拉平”的层数。
+- 传入 `<=0` 的整数将返回原数组，不“拉平”。
+- `Infinity` 关键字作为参数时，无论多少层嵌套，都会转为一维数组。
+- 如果原数组有空位，`Array.prototype.flat()` 会跳过空位。
+
+### 二、实现思路
+
+##### 1.思路：
+
+实现一个有数组扁平化功能的 `flat` 函数，**我们要做的就是在数组中找到是数组类型的元素，然后将他们展开**。这就是实现数组拍平 `flat` 方法的关键思路。
+
+##### 2.流程：
+
+- 第一要遍历数组的每一个元素；
+- 第二判断元素是否是数组；
+- 第三将数组的元素展开一层；
+
+##### 3.遍历数组方案：
+
+- `for 循环`
+- `for...of`
+- `for...in`
+- `forEach()`
+- `entries()`
+- `keys()`
+- `values()`
+- `reduce()`
+- `map()`
+
+##### 3.判断元素是数组方案：
+
+- `instanceof`
+- `constructor`
+- `Object.prototype.toString`
+- `isArray`
+
+##### 4.将数组的元素展开一层方案：
+
+- 扩展运算符(...) + `concat`
+
+`concat()` 方法用于合并两个或多个数组，在拼接的过程中加上扩展运算符会展开一层数组。详细见下面的代码。
+
+- `concat` +`apply`
+
+主要是利用 `apply` 在绑定作用域时，传入的第二个参数是一个数组或者类数组对象，其中的数组元素将作为单独的参数传给 `func` 函数。也就是在调用 `apply` 函数的过程中，会将传入的数组一个一个的传入到要执行的函数中，也就是相当对数组进行了一层的展开。
+
+### 三、实现方法
+
+##### 1.简单实现
+
+```JavaScript
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "前端收割机" }];
+// 通过concat方法加递归方法实现
+function myflat(arr){
+    let res = []; // 存放扁平化数组
+    arr.forEach(item =>{ // 遍历存入数组
+        if(Array.isArray(item)){ // 判断当前元素是否为数组
+            // callee 属性是 arguments 对象的一个成员，它表示对函数对象本身的引用
+            res = res.concat(arguments.callee(item)); // 递归调用
+        }else{
+            res.push(item);
+        }
+    });
+    return res;
+}
+
+myflat(arr);
+// [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, "string", { name: "前端收割机" }];
+```
+
+##### 2.用 `reduce` 实现 `flat` 函数
+
+```javascript
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "前端收割机" }];
+
+// 首先使用 reduce 展开一层效果
+arr.reduce((pre,cur)=>pre.concat(cur),[]);
+// [1, 2, 3, 4, 1, 2, 3, [1, 2, 3, [1, 2, 3]], 5, "string", { name: "前端收割机" }];
+
+// 用 reduce 展开一层 + 递归调用
+const myflat = arr =>{
+    return arr.reduce((pre,cur)=>{
+        return pre.concat(Array.isArray(cur) ? myflat(cur) : cur);
+    },[]);
+};
+
+myflat(arr);
+// [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, "string", { name: "前端收割机" }];
+```
+
+##### 3.使用栈的思想实现 `flat` 函数
+
+```javascript
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "前端收割机" }];
+
+// 栈思想
+function myflat(arr){
+    const res = [];
+    const stack = [].concat(arr); // 将数组元素拷贝至栈，直接赋值会改变原数组
+    while(stack.length !== 0){ // 如果栈不为空，则循环遍历
+        const value = stack.pop(); // 弹出栈顶元素
+        if(Array.isArray(val)){
+            stack.push(...val); // 如果当前元素为数组，将其扩展后再入栈
+        }else{
+            res.unshift(val); // 如果当前元素不是数组，就将其取出来放入结果数组中
+        }
+    }
+    return res;
+}
+
+myflat(arr);
+// [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, "string", { name: "前端收割机" }];
+```
+
+##### 4.通过传入整数参数控制“拉平”层数
+
+```javascript
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "前端收割机" }];
+
+// 用 reduce + 递归调用
+function myflat(arr,num = 1){
+    return num > 0 
+        ? arr.reduce((res,cur) =>{
+        pre.concat(Array.isArray(cur) ? myflat(cur,num-1):cur)
+    	},[]) 
+    	: arr.slice();
+        
+}
+
+flat(arr, Infinity);
+// [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, "string", { name: "前端收割机" }];
+```
+
+##### 5.实现在原型链上重写 `flat` 函数
+
+```javascript
+const arr = [1, 2, 3, 4, [1, 2, 3, [1, 2, 3, [1, 2, 3]]], 5, "string", { name: "前端收割机" }];
+
+Array.prototype.myFlat = function(num = 1) {
+  if (!Number(num) || Number(num) < 0) {
+    return this;
+  }
+  let arr = this.concat();    // 获得调用 myFlat 函数的数组
+  while (num > 0) {           
+    if (arr.some(x => Array.isArray(x))) {
+      arr = [].concat.apply([], arr);	// 数组中还有数组元素的话并且 num > 0，继续展开一层数组 
+    } else {
+      break; // 数组中没有数组元素并且不管 num 是否依旧大于 0，停止循环。
+    }
+    num--;
+  }
+  return arr;
+};
+
+arr.myFlat(Infinity);
+// [1, 2, 3, 4, 1, 2, 3, 1, 2, 3, 1, 2, 3, 5, "string", { name: "前端收割机" }];
+```
+
+##### 6.考虑数组空位的情况
+
+由最开始我们总结的 `flat` 特性知道，`flat` 函数执行是会跳过空位的。ES5 大多数数组方法对空位的处理都会选择跳过空位包括：`forEach()`, `filter()`, `reduce()`, `every()` 和 `some()` 都会跳过空位。
+
+```javascript
+// reduce + 递归调用
+Array.prototype.myFlat = function(num = 1) {
+  if (!Number(num) || Number(num) < 0) {
+    return this;
+  }
+  let arr = [].concat(this);
+  return num > 0
+    ? arr.reduce(
+        (pre, cur) =>
+          pre.concat(Array.isArray(cur) ? cur.myFlat(--num) : cur),
+        []
+      )
+    : arr.slice();
+};
+const arr = [1, [3, 4], , ,];
+arr.myFlat()
+// [1, 3, 4]
+
+// foEach + 递归调用
+Array.prototype.myFlat = function(num = 1) {
+  if (!Number(num) || Number(num) < 0) {
+    return this;
+  }
+  let arr = [];
+  this.forEach(item => {
+    if (Array.isArray(item)) {
+      arr = arr.concat(item.myFlat(--num));
+    } else {
+      arr.push(item);
+    }
+  });
+  return arr;
+};
+const arr = [1, [3, 4], , ,];
+arr.myFlat()
+// [1, 3, 4]
+
+```
+
+希望大家能在本篇推文中收获满满。求关注！！！
+
+参考链接：https://juejin.cn/post/6844904025993773063
