@@ -54,7 +54,7 @@ module.exports = {
         //   ],
         // },
         {
-          label: "前端基础",
+          label: "前端体系",
           position: "right",
           items: [
             {
@@ -62,12 +62,16 @@ module.exports = {
               to: "docs/css/box-model/box-model",
             },
             {
-              label: "JS",
-              to: "docs/JS/js-dom",
+              label: "JavaScript",
+              to: "docs/javascript/js-dom",
             },
-            
+            {
+              label: "TypeScript",
+              to: "docs/typescript/ts-basics",
+            },  
           ],
         },
+
         {
           label: "资源导航",
           position: "right",
