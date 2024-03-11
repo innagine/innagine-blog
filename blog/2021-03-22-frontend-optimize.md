@@ -10,7 +10,7 @@ tags: [前端]
 ---
 
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210305110340828.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../static/img/20210305110340828.png)
 
 <!-- truncate -->
 
@@ -107,7 +107,7 @@ module.exports = {
 - `ServiceWorker` 是运行在浏览器背后的独立线程，它可以做许多事情，比如拦截客户端的请求、向客户端发送消息、向服务器发起请求等等，其中最重要的作用之一就是离线资源缓存。
 - `ServiceWorker`  拥有对缓存流程丰富灵活的控制能力，当页面请求到 `ServiceWorker` 时，`ServiceWorker` 同时请求缓存和网络，把缓存的内容直接给用户，而后覆盖缓存。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210305110101335.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../static/img/20210305110101335.png)
 
 注意：需要https才可以使用Service Worker。
 
@@ -227,17 +227,17 @@ chainWebpack: config => {
 
 - 加载进度条动画
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210305110144225.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../static/img/20210305110144225.png)
 
 - 加载旋转圆圈动画
 
- ![在这里插入图片描述](https://img-blog.csdnimg.cn/20210305110159701.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210305110235609.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+ ![在这里插入图片描述](../static/img/20210305110159701.png)
+![在这里插入图片描述](../static/img/20210305110235609.png)
 
 
 - 加载骨架屏动画
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210305110249844.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../static/img/20210305110249844.png)
 
 ### 四、性能优化总结
 
