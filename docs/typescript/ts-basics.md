@@ -1,8 +1,8 @@
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210712230251919.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../../static/img/20210712230251919.png)
 
 本期系列推文将会推进TypeScript的学习，其实我们不难看出TypeScript是JavaScript的超集，也就是说：typescript是对于JavaScript的扩展，为JavaScript添加了类型系统。
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210712230228899.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../../static/img/20210712230228899.png)
 
 
 优势：
@@ -35,7 +35,7 @@ $ tsc helloworld.ts
 
 - 流程
 
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210712230310961.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
+![在这里插入图片描述](../../static/img/20210712230310961.png)
 
 
 - 注意：
@@ -468,9 +468,4 @@ console.log(obj[sym]); // 前端收割机
 | 相同     | Boolean 类型、Number 类型、String 类型、Symbol 类型、Null类型、Undefined 类型、Array 类型、object类型 | Boolean 类型、Number 类型、String 类型、Symbol 类型、Null类型、Undefined 类型、Array 类型、object类型 |
 | 不同     |                                                              | Enum 类型、Any 类型、Unknown 类型、Tuple 类型、Void 类型、Never 类型 |
 
-
-![在这里插入图片描述](https://img-blog.csdnimg.cn/20210712231345203.jpg?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2ltYWdpbmVfdGlvbg==,size_16,color_FFFFFF,t_70#pic_center)
-有兴趣的小伙伴可以关注公众号，公众号工作日更新前端知识，并且可以根据小伙伴讨论的感兴趣内容进行内容更新
-参考链接：https://www.tslang.cn/index.html
-参考链接：https://juejin.cn/post/6872111128135073806#heading-28
 
