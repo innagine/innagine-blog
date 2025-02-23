@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "docusaurus start",
-    "clear": "docusaurus clear",
-    "build": "docusaurus build",
-    "swizzle": "docusaurus swizzle",
-    "deploy": "docusaurus deploy"
+    "start": "export NODE_OPTIONS=--openssl-legacy-provider && docusaurus start",
+    "clear": "export NODE_OPTIONS=--openssl-legacy-provider && docusaurus clear",
+    "build": "export NODE_OPTIONS=--openssl-legacy-provider && docusaurus build",
+    "swizzle": "export NODE_OPTIONS=--openssl-legacy-provider && docusaurus swizzle",
+    "deploy": "export NODE_OPTIONS=--openssl-legacy-provider && docusaurus deploy"
   },
   "dependencies": {
     "@docusaurus/core": "^2.0.0-alpha.69",
