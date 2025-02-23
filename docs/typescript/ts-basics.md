@@ -1,3 +1,10 @@
+---
+id: ts-basics
+title: 基础类型
+sidebar_label: 基础类型
+---
+
+
 ![在这里插入图片描述](../../static/img/20210712230251919.png)
 
 本期系列推文将会推进TypeScript的学习，其实我们不难看出TypeScript是JavaScript的超集，也就是说：typescript是对于JavaScript的扩展，为JavaScript添加了类型系统。

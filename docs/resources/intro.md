@@ -1,7 +1,15 @@
 ---
 id: resources-intro
-title: 常用资源导航
-sidebar_label: 资源导航
+title: AI资源
+sidebar_label: AI资源
 ---
 
-本页收集了前端开发、UI 设计、软件工具等日常开发中经常会使用到的（持续整理中）。
+一、DeepSeek学习资料：
+https://pg9dia8qq5.feishu.cn/drive/folder/BDXifewhdl4gDUddvhbc6ibdnxh
+
+
+二、25年DeepSeek本地部署视频教程+全套安装包
+链接：https://pan.quark.cn/s/f674a8cd6b4b
+
+三、2025AI人工智能课程精选
+链接：https://pan.quark.cn/s/7ecc73273fd0

@@ -55,6 +55,18 @@ module.exports = {
           "javascript/js-json",
           ],
   },
+  ts_tutorials: {
+    基础: [
+          "typescript/ts-basics",
+          "typescript/ts-function",
+          "typescript/ts-generics",
+          "typescript/ts-assertion",
+          "typescript/ts-interface",
+          "typescript/ts-guard",
+          "typescript/ts-class",
+          "typescript/ts-decorator",
+          ],
+  },
   videos: {
     简介: ["videos/videos-intro"],
     JavaScript: ["videos/js/01-event-loop/event-loop"],
