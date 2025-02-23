@@ -18,14 +18,14 @@ module.exports = {
   //   "React 基础示例": [],
   // },
   css_tutorials: {
-    基础: [
+    目录: [
           "css/box-model/box-model",
           "css/box-model/box-bfc",
           "css/box-model/box-flex",
           ],
   },
   js_tutorials: {
-    基础: [
+    目录: [
           "javascript/js-dom",
           "javascript/js-rubbish",
           "javascript/js-loop",
@@ -56,7 +56,7 @@ module.exports = {
           ],
   },
   ts_tutorials: {
-    基础: [
+    目录: [
           "typescript/ts-basics",
           "typescript/ts-function",
           "typescript/ts-generics",
@@ -98,7 +98,10 @@ module.exports = {
     TypeScript: ["videos/ts/01-intro/ts-intro"],
   },
   resources: {
-    简介: ["resources/resources-intro"],
+    目录: [
+      "resources/resources-intro",
+      "resources/resources-algorithm",
+    ],
     前端开发: [],
     软件工具: [],
     "UI 设计": [],

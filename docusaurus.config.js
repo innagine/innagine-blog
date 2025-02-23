@@ -73,7 +73,7 @@ module.exports = {
         },
 
         {
-          label: "资源导航",
+          label: "资源分享",
           position: "right",
           to: "docs/resources/resources-intro",
         },
