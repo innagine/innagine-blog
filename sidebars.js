@@ -19,9 +19,12 @@ module.exports = {
   // },
   css_tutorials: {
     目录: [
+          "css/css-selectors",
           "css/box-model/box-model",
           "css/box-model/box-bfc",
-          "css/box-model/box-flex",
+          "css/css-flex",
+          "css/css-position",
+          "css/css-grid",
           ],
   },
   js_tutorials: {
